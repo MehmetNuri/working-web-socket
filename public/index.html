@@ -53,7 +53,8 @@
 <div class="log" id="log"></div>
 
 <script>
-  const socket = new WebSocket('ws://localhost:8080');
+  // Render üzerinde çalışan WebSocket adresine bağlanmak için URL'yi buraya ekleyin
+  const socket = new WebSocket('wss://https://working-web-socket.onrender.com');
 
   const statusSelect = document.getElementById('statusSelect');
   const sendButton = document.getElementById('sendButton');
@@ -75,6 +76,11 @@
     log.innerHTML += '<div>Disconnected from WebSocket server</div>';
   });
 
+  // Hata oluştuğunda
+  socket.addEventListener('error', (error) => {
+    log.innerHTML += `<div><strong>Error:</strong> ${error.message}</div>`;
+  });
+
   // "Durum Gönder" butonuna tıklanıldığında
   sendButton.addEventListener('click', () => {
     // Seçilen durumu alın
@@ -86,8 +92,12 @@
     };
 
     // WebSocket sunucusuna gönder
-    socket.send(JSON.stringify(message));
-    log.innerHTML += `<div><strong>Sent:</strong> ${JSON.stringify(message)}</div>`;
+    if (socket.readyState === WebSocket.OPEN) {
+      socket.send(JSON.stringify(message));
+      log.innerHTML += `<div><strong>Sent:</strong> ${JSON.stringify(message)}</div>`;
+    } else {
+      log.innerHTML += '<div><strong>Error:</strong> WebSocket connection is not open.</div>';
+    }
   });
 </script>
 </body>
