@@ -3,7 +3,7 @@ const express = require('express');
 const path = require('path');
 
 const app = express();
-const port = 8080;
+const port = process.env.PORT || 8080; 
 
 // WebSocket Sunucusu
 const wss = new WebSocket.Server({ noServer: true });
@@ -13,18 +13,18 @@ wss.on('connection', (socket) => {
 
     socket.on('message', (data) => {
         try {
-            // Gelen mesajı string'e dönüştür
+          
             const messageString = data.toString();
 
-            // Mesajı JSON olarak parse et
+          
             const parsedMessage = JSON.parse(messageString);
 
             console.log('Received JSON:', parsedMessage);
 
-            // Gelen mesajı tüm bağlı istemcilere yayınla
+           
             wss.clients.forEach((client) => {
                 if (client.readyState === WebSocket.OPEN) {
-                    client.send(JSON.stringify(parsedMessage)); // JSON formatında gönder
+                    client.send(JSON.stringify(parsedMessage));
                 }
             });
         } catch (error) {
@@ -32,16 +32,15 @@ wss.on('connection', (socket) => {
         }
     });
 
-
     socket.on('close', () => {
         console.log('Client disconnected');
     });
 });
 
-// Express ile statik dosya sunumu
+
 app.use(express.static(path.join(__dirname, 'public')));
 
-// HTTP Sunucusunu oluştur ve WebSocket'i entegre et
+
 const server = app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
