@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebSocket Client</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+    select, button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .log {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #f4f4f4;
+      border: 1px solid #ddd;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .log div {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+<h1>WebSocket Client</h1>
+
+<!-- Durum ComboBox -->
+<select id="statusSelect">
+  <option value="working">Çalışıyorum</option>
+  <option value="not_working">Müsaitim</option>
+  <option value="coffee_time">Kahve Molası</option>
+</select>
+<br>
+<!-- Gönder Düğmesi -->
+<button id="sendButton">Durum Gönder</button>
+
+<div class="log" id="log"></div>
+
+<script>
+  const socket = new WebSocket('ws://localhost:8080');
+
+  const statusSelect = document.getElementById('statusSelect');
+  const sendButton = document.getElementById('sendButton');
+  const log = document.getElementById('log');
+
+  // WebSocket bağlantı açıldığında
+  socket.addEventListener('open', () => {
+    log.innerHTML += '<div>Connected to WebSocket server</div>';
+  });
+
+  // WebSocket sunucusundan mesaj alındığında
+  socket.addEventListener('message', (event) => {
+    const receivedData = JSON.parse(event.data);
+    log.innerHTML += `<div><strong>Received:</strong> ${JSON.stringify(receivedData)}</div>`;
+  });
+
+  // WebSocket bağlantı kapandığında
+  socket.addEventListener('close', () => {
+    log.innerHTML += '<div>Disconnected from WebSocket server</div>';
+  });
+
+  // "Durum Gönder" butonuna tıklanıldığında
+  sendButton.addEventListener('click', () => {
+    // Seçilen durumu alın
+    const selectedStatus = statusSelect.value;
+
+    // JSON mesajı oluştur
+    const message = {
+      type: selectedStatus
+    };
+
+    // WebSocket sunucusuna gönder
+    socket.send(JSON.stringify(message));
+    log.innerHTML += `<div><strong>Sent:</strong> ${JSON.stringify(message)}</div>`;
+  });
+</script>
+</body>
+</html>
